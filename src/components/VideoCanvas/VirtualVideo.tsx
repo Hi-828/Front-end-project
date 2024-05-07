@@ -1,5 +1,4 @@
 import { DetailedHTMLProps, forwardRef, useCallback, useEffect, useRef, VideoHTMLAttributes } from 'react';
-import InfoModal from '../../components/Infomodal/Infomodal';
 
 
 type VirtualVideoProps = DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement> & {
@@ -41,22 +40,7 @@ const isBinary = (mimeType: string|null|undefined) => {
 export const canPlayUrl = async (url: string) => {
   const video = document.createElement('video');
 
-  const pathName = new URL(url, /^https?/.exec(url) ? undefined : window.location.href).pathname;
 
-  const fileType = (pathName.split('.').pop() ?? '') as keyof typeof mimeTypeMapping;
-
-  let fileMimeType: string|null|undefined = mimeTypeMapping[fileType];
-
-  if (!fileMimeType) {
-    const fileMeta = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Range': 'bytes=0-0',
-      },
-    });
-
-    fileMimeType = fileMeta.headers.get('content-type');
-  }
 
   // If the file is binary, we can't check if the browser can play it, so we just assume it can.
   const supported = isBinary(fileMimeType) || (!!fileMimeType && video.canPlayType(fileMimeType) !== '');
@@ -164,7 +148,7 @@ export const VirtualVideo = forwardRef<HTMLVideoElement, VirtualVideoProps>((pro
 
     const sourceEl = document.createElement('source');
 
-    sourceEl.setAttribute('src', props.src ?? '');
+    sourceEl.setAttribute('src', `${props.src}?lsv=${guidGenerator()}` ?? '');
     video.current?.appendChild(sourceEl);
 
     source.current = sourceEl;
